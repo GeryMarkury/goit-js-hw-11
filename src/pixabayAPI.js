@@ -19,5 +19,5 @@ export class PixabayAPI {
         safesearch: true,
       },
     });
-  }
-}
+  };
+};
