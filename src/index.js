@@ -12,14 +12,16 @@ const onSearchFormSubmit = async event => {
     event.preventDefault();
     
     const searchQuery = event.currentTarget.elements['searchQuery'].value.trim();
-    pixabayAPI.query = searchQuery;
+  
+  pixabayAPI.query = searchQuery;
+  pixabayAPI.page = 1;
 
     try {
       const result = await pixabayAPI.fetchPhotos();
       
       const images = result.data.hits;
 
-    if (!images.length || searchQuery === "") {
+    if (images.length === 0 || searchQuery === "") {
       Notify.failure('Sorry, there are no images matching your search query. Please try again.');
       return;
     }
@@ -27,8 +29,12 @@ const onSearchFormSubmit = async event => {
       Notify.success(`Hooray! We found ${result.data.totalHits} images.`);
       
     renderGalleryList(images);
+    
+      const totalPages = Math.floor(result.data.totalHits / 40 + 1);
       
-    loadMoreBtnEl.classList.remove('is-hidden');
+      if (totalPages > 1) {
+        loadMoreBtnEl.classList.remove('is-hidden')
+      }
   } catch (err) {
     console.log(err);
   }
@@ -48,7 +54,7 @@ const onLoadMoreBtnClick = async () => {
   try {
     const result = await pixabayAPI.fetchPhotos();
     const images = result.data.hits;
-    const totalPages = Math.floor(result.data.totalHits / 40);
+    const totalPages = Math.floor(result.data.totalHits / 40 + 1);
 
     if (pixabayAPI.page === totalPages) {
       loadMoreBtnEl.classList.add('is-hidden');
@@ -56,19 +62,16 @@ const onLoadMoreBtnClick = async () => {
     }
 
     renderGalleryList(images);
+    
   } catch (err) {
     console.log(err);
   }
 };
 
 const clearGallery = (event) => {
-  const searchQuery = event.currentTarget.elements['searchQuery'].value.trim();
-
-    if (!searchQuery) {
       galleryListEl.innerHTML = "";
       loadMoreBtnEl.classList.add('is-hidden');
       pixabayAPI.page = 1;
-    }
 }
 
 
